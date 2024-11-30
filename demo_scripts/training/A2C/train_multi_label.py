@@ -1,11 +1,10 @@
 from nlp_gym.data_pools.custom_multi_label_pools import ReutersDataPool
 from nlp_gym.envs.multi_label.env import MultiLabelEnv
 from nlp_gym.envs.multi_label.reward import F1RewardFunction
-from stable_baselines.deepq import MlpPolicy as DQNPolicy
-from stable_baselines import DQN
+from stable_baselines.common.policies import MlpPolicy
+from stable_baselines import A2C
 from stable_baselines.common.env_checker import check_env
 from rich import print
-
 
 def eval_model(model, env):
     done = False
@@ -13,7 +12,7 @@ def eval_model(model, env):
     total_reward = 0.0
     actions = []
     while not done:
-        action, _states = model.predict(obs)
+        action, _states = model.predict(obs, deterministic=True)
         obs, rewards, done, info = env.step(action)
         actions.append(env.action_space.ix_to_action(action))
         total_reward += rewards
@@ -23,7 +22,6 @@ def eval_model(model, env):
     print(f"Oracle Label: {env.current_sample.label}")
     print(f"Total Reward: {total_reward}")
     print("---------------------------------------------")
-
 
 # data pool
 pool = ReutersDataPool.prepare(split="train")
@@ -41,11 +39,27 @@ for sample, weight in pool:
 # check the environment
 check_env(env, warn=True)
 
-# train a MLP Policy
-model = DQN(env=env, policy=DQNPolicy, gamma=0.99, batch_size=32, learning_rate=1e-3,
-            double_q=True, exploration_fraction=0.1,
-            prioritized_replay=False, policy_kwargs={"layers": [200]},
-            verbose=1)
-for i in range(int(1e+3)):
-    model.learn(total_timesteps=int(1e+3), reset_num_timesteps=False)
+# train an A2C Policy
+model = A2C(
+    policy=MlpPolicy,
+    env=env,
+    learning_rate=7e-4,
+    n_steps=5,
+    gamma=0.99,
+    ent_coef=0.01,
+    vf_coef=0.25,
+    max_grad_norm=0.5,
+    alpha=0.99,
+    epsilon=1e-5,
+    lr_schedule='constant',
+    verbose=1,
+    policy_kwargs={"net_arch": [200]}
+)
+
+total_timesteps = int(1e6)  # Increased total timesteps for better learning
+num_iterations = 100  # Number of training iterations
+
+for i in range(num_iterations):
+    model.learn(total_timesteps=total_timesteps // num_iterations, reset_num_timesteps=False)
+    print(f"Iteration {i+1}/{num_iterations} completed")
     eval_model(model, env)
