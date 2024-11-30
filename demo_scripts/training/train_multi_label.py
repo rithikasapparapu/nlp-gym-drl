@@ -1,7 +1,11 @@
 from nlp_gym.data_pools.custom_multi_label_pools import ReutersDataPool
 from nlp_gym.envs.multi_label.env import MultiLabelEnv
 from nlp_gym.envs.multi_label.reward import F1RewardFunction
+<<<<<<< Updated upstream
 from stable_baselines.dqn import MlpPolicy as DQNPolicy
+=======
+from stable_baselines.deepq import MlpPolicy as DQNPolicy
+>>>>>>> Stashed changes
 from stable_baselines import DQN
 from stable_baselines.common.env_checker import check_env
 from rich import print

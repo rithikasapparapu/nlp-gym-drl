@@ -96,7 +96,7 @@ class SeqTagEnv(BaseEnv):
     @staticmethod
     def _tokenize(text: str, label: List[str]) -> List[str]:
         tokens = SpaceTokenizer().run_tokenize(text)
-        token_texts = [token.text for token in tokens]
+        token_texts = tokens
 
         assert len(token_texts) == len(label), "Tokenization does not match with available labels"
         return token_texts
