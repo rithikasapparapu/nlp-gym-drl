@@ -5,7 +5,8 @@ from stable_baselines.deepq.policies import MlpPolicy as DQNPolicy
 from stable_baselines import DQN
 from stable_baselines.common.env_checker import check_env
 import tqdm
-
+import matplotlib.pyplot as plt
+import numpy as np
 
 def eval_model(env, model, pool):
     correctly_answered = 0.0
@@ -43,6 +44,42 @@ model = DQN(env=env, policy=DQNPolicy, gamma=0.99, batch_size=32, learning_rate=
             double_q=True, exploration_fraction=0.1,
             prioritized_replay=False, policy_kwargs={"layers": [64, 64]},
             verbose=1)
-for i in range(int(1e+2)):
-    model.learn(total_timesteps=int(1e+2), reset_num_timesteps=False)
-    print(eval_model(env, model, val_pool))
+# Lists to store metrics for plotting
+steps = []
+rewards = []
+current_step = 0
+
+total_iterations = int(1e+2)
+timesteps_per_iteration = int(1e+2)
+
+for i in range(total_iterations):
+    model.learn(total_timesteps=timesteps_per_iteration, reset_num_timesteps=False)
+    current_step += timesteps_per_iteration
+
+    # Evaluate and store metrics
+    reward = eval_model(env, model, val_pool)
+    steps.append(current_step)
+    rewards.append(reward)
+
+    print(f"Iteration {i + 1}/{total_iterations}, Validation Accuracy: {reward}")
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(steps, rewards, label='DQN-informed', color='green')
+
+# Add confidence intervals (using standard deviation)
+if len(rewards) > 1:
+    std = np.std(rewards)
+    plt.fill_between(steps,
+                     np.array(rewards) - std,
+                     np.array(rewards) + std,
+                     alpha=0.2,
+                     color='green')
+
+plt.xlabel('Steps')
+plt.ylabel('Episodic Total Reward')
+plt.title('QA with QASC (DQN)')
+plt.legend(title='strategy')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
