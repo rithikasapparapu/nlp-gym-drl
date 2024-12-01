@@ -5,6 +5,8 @@ from stable_baselines.common.policies import MlpPolicy
 from stable_baselines import A2C
 from stable_baselines.common.env_checker import check_env
 import tqdm
+import matplotlib.pyplot as plt
+import numpy as np
 
 def eval_model(env, model, pool):
     correctly_answered = 0.0
@@ -52,11 +54,33 @@ model = A2C(
     policy_kwargs={"net_arch": [64, 64]}
 )
 
-total_timesteps = int(1e5)  # Increased total timesteps for better learning
-num_iterations = 100  # Number of training iterations
+# Lists to store metrics for plotting
+steps = []
+rewards = []
+current_step = 0
 
-for i in range(num_iterations):
-    model.learn(total_timesteps=total_timesteps // num_iterations, reset_num_timesteps=False)
-    print(f"Iteration {i+1}/{num_iterations} completed")
-    accuracy = eval_model(env, model, val_pool)
-    print(f"Validation Accuracy: {accuracy}")
+total_iterations = int(1e+2)
+timesteps_per_iteration = int(1e+2)
+
+for i in range(total_iterations):
+    model.learn(total_timesteps=timesteps_per_iteration, reset_num_timesteps=False)
+    current_step += timesteps_per_iteration
+
+    # Evaluate and store metrics
+    reward = eval_model(env, model, val_pool)
+    steps.append(current_step)
+    rewards.append(reward)
+
+    print(f"Iteration {i + 1}/{total_iterations}, Validation Accuracy: {reward}")
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(steps, rewards, label='A2C', color='red')
+
+plt.xlabel('Steps')
+plt.ylabel('Episodic Total Reward')
+plt.title('QA with QASC (A2C)')
+plt.legend(title='strategy')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()

@@ -65,16 +65,7 @@ for i in range(total_iterations):
 
 # Plotting
 plt.figure(figsize=(10, 6))
-plt.plot(steps, rewards, label='DQN-informed', color='green')
-
-# Add confidence intervals (using standard deviation)
-if len(rewards) > 1:
-    std = np.std(rewards)
-    plt.fill_between(steps,
-                     np.array(rewards) - std,
-                     np.array(rewards) + std,
-                     alpha=0.2,
-                     color='green')
+plt.plot(steps, rewards, label='DQN', color='green')
 
 plt.xlabel('Steps')
 plt.ylabel('Episodic Total Reward')
