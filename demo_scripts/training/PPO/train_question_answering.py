@@ -57,8 +57,8 @@ steps = []
 rewards = []
 current_step = 0  # Initialize step counter
 
-total_timesteps = int(1e3)  # Adjust this based on your needs
-timesteps_per_iteration = total_timesteps // 10
+total_timesteps = int(1e6)  # Adjust this based on your needs
+timesteps_per_iteration = total_timesteps // 1000
 
 for i in range(1000):  # Number of training iterations
     model.learn(total_timesteps=timesteps_per_iteration)
@@ -74,16 +74,7 @@ for i in range(1000):  # Number of training iterations
 
 # Plotting
 plt.figure(figsize=(10, 6))
-plt.plot(steps, rewards, label='PPO-informed', color='red')
-
-# Add confidence intervals (using standard deviation)
-if len(rewards) > 1:
-    std = np.std(rewards)
-    plt.fill_between(steps,
-                    np.array(rewards) - std,
-                    np.array(rewards) + std,
-                    alpha=0.2,
-                    color='red')
+plt.plot(steps, rewards, label='PPO', color='blue')
 
 plt.xlabel('Steps')
 plt.ylabel('Episodic Total Reward')
