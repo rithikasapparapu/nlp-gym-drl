@@ -59,8 +59,8 @@ steps = []
 rewards = []
 current_step = 0
 
-total_iterations = int(1e+2)
-timesteps_per_iteration = int(1e+2)
+total_iterations = int(1e+3)
+timesteps_per_iteration = int(1e+3)
 
 for i in range(total_iterations):
     model.learn(total_timesteps=timesteps_per_iteration, reset_num_timesteps=False)
